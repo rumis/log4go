@@ -37,6 +37,15 @@ type Options struct {
 
 	// Level level
 	Level Level
+
+	// WithStack configures the Logger to record a stack trace for all messages at
+	// or above a given level.
+	WithStack bool
+
+	// WithCaller configures the Logger to annotate each message with the filename,
+	// line number, and function name of caller.
+	WithCaller bool
+
 	// Filename is the file to write logs to.  Backup log files will be retained
 	// in the same directory.  It uses <processname>-lumberjack.log in
 	// os.TempDir() if empty.
@@ -223,6 +232,18 @@ func WithLevel(level string) OptionHandler {
 	}
 }
 
+func WithStack(stack bool) OptionHandler {
+	return func(opt *Options) {
+		opt.WithStack = stack
+	}
+}
+
+func WithCaller(caller bool) OptionHandler {
+	return func(opt *Options) {
+		opt.WithCaller = caller
+	}
+}
+
 // DefaultOption 默认配置
 func DefaultOption() Options {
 	return Options{
@@ -241,6 +262,9 @@ func DefaultOption() Options {
 		StacktraceKey:       "stack",
 		SkipLineEnding:      false,
 		LineEnding:          "\n",
+		Level:               DebugLevel,
+		WithStack:           true,
+		WithCaller:          true,
 		EncodeLevel:         LowercaseLevelEncoder,
 		EncodeTime:          StandTimeEncoder(),
 		EncodeDuration:      MillisDurationEncoder,

@@ -64,7 +64,15 @@ func NewConsoleLogger(oh ...OptionHandler) *ConsoleLogger {
 		write,
 		atomicLevel)
 
-	logger := zap.New(core)
+	zapOpts := make([]zap.Option, 0)
+	if opts.WithCaller {
+		zapOpts = append(zapOpts, zap.AddCaller())
+	}
+	if opts.WithStack {
+		zapOpts = append(zapOpts, zap.AddStacktrace(DebugLevel))
+	}
+
+	logger := zap.New(core, zapOpts...)
 
 	return &ConsoleLogger{
 		zap: logger,
