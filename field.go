@@ -10,6 +10,11 @@ import (
 type Field zapcore.Field
 type Fields []zapcore.Field
 
+type ContextField struct{}
+
+// ContextFieldsKey context携带的信息KEY
+var ContextFieldsKey = ContextField{}
+
 var (
 	_minTimeInt64 = time.Unix(0, math.MinInt64)
 	_maxTimeInt64 = time.Unix(0, math.MaxInt64)

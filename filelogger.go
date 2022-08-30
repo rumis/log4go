@@ -12,7 +12,8 @@ import (
 
 // FileLogger 基于zap的文件日志
 type FileLogger struct {
-	zap *zap.Logger
+	zap       *zap.Logger
+	extfields []Field
 }
 
 // NewFileLogger 创建默认的文件日志
@@ -83,60 +84,33 @@ func NewFileLogger(oh ...OptionHandler) *FileLogger {
 	logger := zap.New(core, zapOpts...)
 
 	return &FileLogger{
-		zap: logger,
+		zap:       logger,
+		extfields: opts.ExtFields,
 	}
 }
 
 // Info logs a message at InfoLevel. The message includes any fields passed
 // at the log site, as well as any fields accumulated on the logger.
 func (f *FileLogger) Info(ctx context.Context, msg string, fields ...Field) {
-	if f.zap == nil {
-		return
-	}
-	if len(fields) == 0 {
-		f.zap.Info(msg)
-		return
-	}
-	f.zap.Info(msg, FieldsConvert(fields)...)
+	f.Log(ctx, InfoLevel, msg, fields...)
 }
 
 // Debug logs a message at DebugLevel. The message includes any fields passed
 // at the log site, as well as any fields accumulated on the logger.
 func (f *FileLogger) Debug(ctx context.Context, msg string, fields ...Field) {
-	if f.zap == nil {
-		return
-	}
-	if len(fields) == 0 {
-		f.zap.Debug(msg)
-		return
-	}
-	f.zap.Debug(msg, FieldsConvert(fields)...)
+	f.Log(ctx, DebugLevel, msg, fields...)
 }
 
 // Warn logs a message at WarnLevel. The message includes any fields passed
 // at the log site, as well as any fields accumulated on the logger.
 func (f *FileLogger) Warn(ctx context.Context, msg string, fields ...Field) {
-	if f.zap == nil {
-		return
-	}
-	if len(fields) == 0 {
-		f.zap.Warn(msg)
-		return
-	}
-	f.zap.Warn(msg, FieldsConvert(fields)...)
+	f.Log(ctx, WarnLevel, msg, fields...)
 }
 
 // Error logs a message at ErrorLevel. The message includes any fields passed
 // at the log site, as well as any fields accumulated on the logger.
 func (f *FileLogger) Error(ctx context.Context, msg string, fields ...Field) {
-	if f.zap == nil {
-		return
-	}
-	if len(fields) == 0 {
-		f.zap.Error(msg)
-		return
-	}
-	f.zap.Error(msg, FieldsConvert(fields)...)
+	f.Log(ctx, ErrorLevel, msg, fields...)
 }
 
 // Panic logs a message at PanicLevel. The message includes any fields passed
@@ -144,14 +118,7 @@ func (f *FileLogger) Error(ctx context.Context, msg string, fields ...Field) {
 //
 // The logger then panics, even if logging at PanicLevel is disabled.
 func (f *FileLogger) Panic(ctx context.Context, msg string, fields ...Field) {
-	if f.zap == nil {
-		return
-	}
-	if len(fields) == 0 {
-		f.zap.Panic(msg)
-		return
-	}
-	f.zap.Panic(msg, FieldsConvert(fields)...)
+	f.Log(ctx, PanicLevel, msg, fields...)
 }
 
 // Fatal logs a message at FatalLevel. The message includes any fields passed
@@ -160,14 +127,33 @@ func (f *FileLogger) Panic(ctx context.Context, msg string, fields ...Field) {
 // The logger then calls os.Exit(1), even if logging at FatalLevel is
 // disabled.
 func (f *FileLogger) Fatal(ctx context.Context, msg string, fields ...Field) {
+	f.Log(ctx, FatalLevel, msg, fields...)
+}
+
+// Log logs a message at the specified level. The message includes any fields
+// passed at the log site, as well as any fields accumulated on the logger.
+func (f *FileLogger) Log(ctx context.Context, lvl Level, msg string, fields ...Field) {
 	if f.zap == nil {
 		return
 	}
-	if len(fields) == 0 {
-		f.zap.Fatal(msg)
-		return
+	// 基础扩展字段
+	fields = append(fields, f.extfields...)
+
+	// 上下文扩展字段
+	cval := ctx.Value(ContextFieldsKey)
+	if cval != nil {
+		if cfields, ok := cval.([]Field); ok {
+			fields = append(fields, cfields...)
+		}
 	}
-	f.zap.Fatal(msg, FieldsConvert(fields)...)
+	// 写入日志
+	if ce := f.zap.Check(lvl, msg); ce != nil {
+		if len(fields) == 0 {
+			ce.Write()
+			return
+		}
+		ce.Write(FieldsConvert(fields)...)
+	}
 }
 
 // Sync flushing any buffered log entries.

@@ -75,6 +75,9 @@ type Options struct {
 	// Compress determines if the rotated log files should be compressed
 	// using gzip. The default is not to perform compression.
 	Compress bool
+
+	// ExtFields configures the Logger to annotate each message with the extend fields.
+	ExtFields []Field
 }
 
 type OptionHandler func(opt *Options)
@@ -241,6 +244,12 @@ func WithStack(stack bool) OptionHandler {
 func WithCaller(caller bool) OptionHandler {
 	return func(opt *Options) {
 		opt.WithCaller = caller
+	}
+}
+
+func WithExtendFields(fields ...Field) OptionHandler {
+	return func(opt *Options) {
+		opt.ExtFields = fields
 	}
 }
 
