@@ -2,6 +2,7 @@ package log4go
 
 import "context"
 
+// Logger logger
 type Logger interface {
 	// Info logs a message at InfoLevel. The message includes any fields passed
 	// at the log site, as well as any fields accumulated on the logger.

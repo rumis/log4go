@@ -31,6 +31,34 @@ func TestLogger(t *testing.T) {
 
 }
 
+func TestMultiLogger(t *testing.T) {
+
+	ctx := context.TODO()
+	ctx = context.WithValue(ctx, ContextFieldsKey, []Field{
+		String("s0", "context field"),
+	})
+
+	// dlog := NewFileLogger(WithLevel("debug"), WithCaller(false), WithStack(false))
+	clog := NewConsoleLogger(WithLevel("debug"),
+		WithStack(false),
+		WithExtendFields(String("s1", "ext field1"), Int64("i2", 3)))
+
+	// glog := NewGroupLogger(dlog, clog)
+
+	// SetDefaultLogger(clog)
+	SetLogger("console", clog)
+
+	// defer Sync(ctx)
+
+	GetLogger("console").Info(ctx, "test1")
+	GetLogger("console").Debug(ctx, "debug test", Int("t2", 2))
+	GetLogger("console").Error(ctx, "error test", String("t", "www.baidu.com"))
+	GetLogger("console").Warn(ctx, "warn test", String("w", "bilibili.com"))
+
+	Info(ctx, "nil")
+
+}
+
 func BenchmarkConsoleLogger(b *testing.B) {
 	ctx := context.TODO()
 

@@ -2,12 +2,12 @@ package log4go
 
 import "context"
 
-// GroupLogger 日志组
+// GroupLogger multi logger
 type GroupLogger struct {
 	loggers []Logger
 }
 
-// NewGroupLogger 创建新Logger
+// NewGroupLogger new multi logger
 func NewGroupLogger(logger ...Logger) *GroupLogger {
 	return &GroupLogger{
 		loggers: logger,

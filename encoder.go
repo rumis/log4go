@@ -76,6 +76,7 @@ func FullNameEncoder(loggerName string, enc PrimitiveArrayEncoder) {
 	enc.AppendString(loggerName)
 }
 
+// DefaultReflectedEncoder serializes the log in json
 func DefaultReflectedEncoder(w io.Writer) ReflectedEncoder {
 	enc := json.NewEncoder(w)
 	// For consistency with our custom JSON encoder.

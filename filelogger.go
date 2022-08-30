@@ -10,21 +10,21 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// FileLogger 基于zap的文件日志
+// FileLogger file log base zap
 type FileLogger struct {
 	zap       *zap.Logger
 	extfields []Field
 }
 
-// NewFileLogger 创建默认的文件日志
+// NewFileLogger create new file logger
 func NewFileLogger(oh ...OptionHandler) *FileLogger {
 
-	// 初始配置
+	// initialize config
 	opts := DefaultOption()
 	for _, fn := range oh {
 		fn(&opts)
 	}
-	// 定义文件写入&拆分逻辑
+	// file rotate config
 	hook := lumberjack.Logger{
 		Filename:   opts.Filename,
 		MaxSize:    opts.MaxSize,
@@ -65,7 +65,7 @@ func NewFileLogger(oh ...OptionHandler) *FileLogger {
 		},
 		ConsoleSeparator: opts.ConsoleSeparator,
 	}
-	// 定义日志等级
+	// level
 	atomicLevel := zap.NewAtomicLevel()
 	atomicLevel.SetLevel(opts.Level)
 	core := zapcore.NewCore(
@@ -136,17 +136,17 @@ func (f *FileLogger) Log(ctx context.Context, lvl Level, msg string, fields ...F
 	if f.zap == nil {
 		return
 	}
-	// 基础扩展字段
+	// static extend fields
 	fields = append(fields, f.extfields...)
 
-	// 上下文扩展字段
+	// context extend fields
 	cval := ctx.Value(ContextFieldsKey)
 	if cval != nil {
 		if cfields, ok := cval.([]Field); ok {
 			fields = append(fields, cfields...)
 		}
 	}
-	// 写入日志
+	// write
 	if ce := f.zap.Check(lvl, msg); ce != nil {
 		if len(fields) == 0 {
 			ce.Write()

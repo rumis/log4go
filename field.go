@@ -12,7 +12,7 @@ type Fields []zapcore.Field
 
 type ContextField struct{}
 
-// ContextFieldsKey context携带的信息KEY
+// ContextFieldsKey key of context extend fields
 var ContextFieldsKey = ContextField{}
 
 var (
@@ -44,7 +44,7 @@ const (
 	ErrorType = zapcore.ErrorType
 )
 
-// FieldsConvert 参数类型转换
+// FieldsConvert convert Field to zapcore.Field
 func FieldsConvert(fields []Field) []zapcore.Field {
 	f := make([]zapcore.Field, 0, len(fields))
 	for _, v := range fields {

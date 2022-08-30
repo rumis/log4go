@@ -10,16 +10,16 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// ConsoleLogger 基于zap的控制台日志
+// ConsoleLogger console logger base on zap
 type ConsoleLogger struct {
 	zap       *zap.Logger
 	extfields []Field
 }
 
-// NewConsoleLogger 创建默认的控制台日志
+// NewConsoleLogger create a new ConsoleLogger
 func NewConsoleLogger(oh ...OptionHandler) *ConsoleLogger {
 
-	// 初始配置
+	// initialize config
 	opts := DefaultOption()
 	for _, fn := range oh {
 		fn(&opts)
@@ -57,7 +57,7 @@ func NewConsoleLogger(oh ...OptionHandler) *ConsoleLogger {
 		},
 		ConsoleSeparator: opts.ConsoleSeparator,
 	}
-	// 定义日志等级
+	// log level
 	atomicLevel := zap.NewAtomicLevel()
 	atomicLevel.SetLevel(opts.Level)
 	core := zapcore.NewCore(
@@ -72,7 +72,7 @@ func NewConsoleLogger(oh ...OptionHandler) *ConsoleLogger {
 	if opts.WithStack {
 		zapOpts = append(zapOpts, zap.AddStacktrace(DebugLevel))
 	}
-
+	// zap core
 	logger := zap.New(core, zapOpts...)
 
 	return &ConsoleLogger{
@@ -128,17 +128,17 @@ func (c *ConsoleLogger) Log(ctx context.Context, lvl Level, msg string, fields .
 	if c.zap == nil {
 		return
 	}
-	// 基础扩展字段
+	// static extend fields
 	fields = append(fields, c.extfields...)
 
-	// 上下文扩展字段
+	// context extend fields
 	cval := ctx.Value(ContextFieldsKey)
 	if cval != nil {
 		if cfields, ok := cval.([]Field); ok {
 			fields = append(fields, cfields...)
 		}
 	}
-	// 写入日志
+	// write
 	if ce := c.zap.Check(lvl, msg); ce != nil {
 		if len(fields) == 0 {
 			ce.Write()

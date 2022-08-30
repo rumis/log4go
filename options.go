@@ -253,10 +253,10 @@ func WithExtendFields(fields ...Field) OptionHandler {
 	}
 }
 
-// DefaultOption 默认配置
+// DefaultOption default options
 func DefaultOption() Options {
 	return Options{
-		Filename:            "/tmp/lumberjack.log",
+		Filename:            "/tmp/log4go.log",
 		MaxSize:             100,
 		MaxAge:              0,
 		MaxBackups:          0,
