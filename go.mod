@@ -1,4 +1,4 @@
-module github.com/huanjiesm/log4go
+module github.com/rumis/log4go
 
 go 1.16
 
